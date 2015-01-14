@@ -1,5 +1,4 @@
 require 'thread'
-sprockets_environment_call_mutex = Mutex.new
 
 module Middleman
   module Sprockets
@@ -17,6 +16,7 @@ module Middleman
 
       # Setup
       def initialize(app, options={})
+        @sprockets_environment_call_mutex = Mutex.new
         @imported_assets = []
         @app = app
         @debug_assets = options.fetch(:debug_assets, false)
@@ -187,7 +187,7 @@ module Middleman
       end
 
       def call(env)
-      sprockets_environment_call_mutex.synchronize do
+      @sprockets_environment_call_mutex.synchronize do
         # Set the app current path based on the full URL so that helpers work
         request_path = URI.decode(File.join(env['SCRIPT_NAME'], env['PATH_INFO']))
         if request_path.respond_to? :force_encoding
