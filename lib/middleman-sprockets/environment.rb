@@ -1,3 +1,6 @@
+require 'thread'
+sprockets_environment_call_mutex = Mutex.new
+
 module Middleman
   module Sprockets
     # Generic Middleman Sprockets env
@@ -184,6 +187,7 @@ module Middleman
       end
 
       def call(env)
+      sprockets_environment_call_mutex.synchronize do
         # Set the app current path based on the full URL so that helpers work
         request_path = URI.decode(File.join(env['SCRIPT_NAME'], env['PATH_INFO']))
         if request_path.respond_to? :force_encoding
@@ -216,6 +220,7 @@ module Middleman
         end
 
         super
+      end
       end
 
       # Tell Middleman to build this asset, referenced as a logical path.
